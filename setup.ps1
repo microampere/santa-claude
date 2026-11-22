@@ -23,8 +23,11 @@ foreach ($name in 'CLAUDE.md', 'statusline.js', 'settings.json') {
 # Commit with GitHub's private noreply address so pushes don't expose a personal email.
 $noreply = '6538201+microampere@users.noreply.github.com'
 if (Get-Command git -ErrorAction SilentlyContinue) {
-    git config --global user.email $noreply
-    Write-Host "Set git user.email to $noreply"
+    # author.email and committer.email take priority over user.email, so set all three.
+    foreach ($key in 'user.email', 'author.email', 'committer.email') {
+        git config --global $key $noreply
+    }
+    Write-Host "Set git user/author/committer email to $noreply"
 } else {
     Write-Host 'git not found; skipped setting user.email'
 }
