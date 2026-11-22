@@ -12,7 +12,7 @@ config, so a new machine can be set up from this one repo.
 | `config/CLAUDE.md` | Global instructions (`~/.claude/CLAUDE.md`) |
 | `config/statusline.js` | Status line: model, context %, 5h/7d limits, effort |
 | `config/settings.json` | Global settings; also registers this marketplace and enables task-band |
-| `setup.ps1` | Copies `config/` into `~/.claude`, backing up anything it replaces |
+| `setup.ps1` | Copies `config/` into `~/.claude`, backing up anything it replaces, and sets git's global `user.email` to my GitHub noreply address |
 
 Third-party skills are not copied here. They come from their own sources: Matt Pocock's
 skills via the `mattpocock-skills` plugin synced from claude.ai, and superpowers via its marketplace.

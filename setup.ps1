@@ -20,6 +20,15 @@ foreach ($name in 'CLAUDE.md', 'statusline.js', 'settings.json') {
     Write-Host "Installed $name"
 }
 
+# Commit with GitHub's private noreply address so pushes don't expose a personal email.
+$noreply = '6538201+microampere@users.noreply.github.com'
+if (Get-Command git -ErrorAction SilentlyContinue) {
+    git config --global user.email $noreply
+    Write-Host "Set git user.email to $noreply"
+} else {
+    Write-Host 'git not found; skipped setting user.email'
+}
+
 Write-Host ''
 Write-Host 'Done. Start Claude Code; if task-band is not active, run:'
 Write-Host '  claude plugin install task-band --marketplace microampere/santa-claude'
