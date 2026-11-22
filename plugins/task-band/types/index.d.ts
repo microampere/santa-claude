@@ -4,6 +4,8 @@ export type Report = {
   task: string
   status: TaskStatus
   asks: string[]
+  /** A dim line under the task, e.g. when the band was not updated this turn. */
+  note?: string
 }
 
 export type StepStatus = 'pending' | 'in_progress' | 'completed'

@@ -164,7 +164,12 @@ export const register: Register = on => {
     if (!agentOf(e) && !reported) {
       const d = await read($, draft)
       if (d) {
-        await update($, last, () => ({ task: d, status: 'done' as const, asks: ['(No report sent for this turn.)'] }))
+        await update($, last, () => ({
+          task: d,
+          status: 'done' as const,
+          asks: [],
+          note: "Claude didn't update the band this turn",
+        }))
         await update($, draft, () => null)
       }
     }
@@ -197,7 +202,7 @@ export const register: Register = on => {
     const narrow = e.props.bodyColumns < 80
     const HEAD = 'suggestion'
     // A thin glyph line as tall as the tallest column; the glyph's own gaps leave it ~90% high.
-    const rows = Math.max(3, 1 + asks.length)
+    const rows = Math.max(3 + (!working && r?.note ? 1 : 0), 1 + asks.length)
     // Stacked: a thin horizontal line the full width of the band. It is drawn
     // longer than any band and clipped at the edge, since cell widths differ
     // per surface and a counted line can overflow and wrap.
@@ -232,6 +237,7 @@ export const register: Register = on => {
           <Text bold color={HEAD} dimColor={dim}>Task</Text>
           <Text dimColor={dim} wrap="truncate-end">{task}</Text>
           <Text color={badge.color}>{badge.icon} {badge.label}</Text>
+          {!working && r?.note ? <Text dimColor>{r.note}</Text> : null}
         </Box>
         {divider}
         <Box flexDirection="column" flexShrink={1}>

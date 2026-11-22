@@ -18,7 +18,7 @@ const BAND = {
 const REPORT = 'mcp__task-band__report'
 
 test('a subagent report does not overwrite the band', async ($, on) => {
-  on('tool.register', () => ({ value: undefined }))
+  on('tool.register', () => ({ value: { tool: REPORT } }))
   on('session.start', (_, e) => ({ cwd: e.cwd }))
   await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
 
@@ -35,7 +35,7 @@ test('a subagent report does not overwrite the band', async ($, on) => {
 })
 
 test('the subagent line shows only while one is running', async ($, on) => {
-  on('tool.register', () => ({ value: undefined }))
+  on('tool.register', () => ({ value: { tool: REPORT } }))
   on('session.start', (_, e) => ({ cwd: e.cwd }))
   on('agent.spawn', () => ({ model: 'test-model', agentId: 'a1' }))
   await $.session.start({ cwd: '/', surface: 'desktop', isInteractive: true })
@@ -45,7 +45,9 @@ test('the subagent line shows only while one is running', async ($, on) => {
   expect(await ui.find({ type: 'Text', text: /subagent/ })).toBeUndefined()
   await ui.unmount()
 
-  await $.agent.spawn({ prompt: 'Read README.md.', description: 'Read readme' })
+  // The test raises agent.spawn as the Agent tool would; only the fields the mod reads matter.
+  const spawn = { prompt: 'Read README.md.', description: 'Read readme' }
+  await $.agent.spawn(spawn as unknown as Parameters<typeof $.agent.spawn>[0])
 
   ui = await $.ui.mount({ ...BAND, surface: 'desktop' })
   expect((await ui.find({ type: 'Text', text: /subagent/ }))?.text).toBe('↳ 1 subagent running')
