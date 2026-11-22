@@ -35,6 +35,12 @@ Then start Claude Code. If the task band doesn't appear, install it yourself:
 claude plugin install task-band --marketplace microampere/santa-claude
 ```
 
+If that says the marketplace is unknown, add it first:
+
+```powershell
+claude plugin marketplace add microampere/santa-claude
+```
+
 Or at the prompt of a terminal session: `/plugin install task-band --marketplace microampere/santa-claude`.
 Answer `y` to add the marketplace, then pick the user scope.
 
