@@ -11,6 +11,10 @@ const WRAP_TOOL = 'mcp__ccd_turn__wrap_up'
 const last = atom({ plugin: 'task-band', key: 'last' } as const, null)
 const steps = atom({ plugin: 'task-band', key: 'steps' } as const, null)
 const draft = atom({ plugin: 'task-band', key: 'draft' } as const, null)
+// Ids of subagents that have started and not yet reported back.
+const running = atom({ plugin: 'task-band', key: 'running' } as const, [])
+
+const agentOf = (e: unknown): string | undefined => (e as { agentId?: string }).agentId
 
 const STATUSES: readonly TaskStatus[] = ['running', 'done', 'blocked', 'failed']
 
@@ -126,7 +130,22 @@ export const register: Register = on => {
     return next(e)
   }).catch(($, e, next) => next(e))
 
+  on('agent.spawn', async ($, e, next) => {
+    const r = await next(e)
+    const id = r.agentId
+    if (id) await update($, running, ids => (ids.includes(id) ? ids : [...ids, id]))
+    return r
+  }).catch(($, e, next) => next(e))
+
+  on('agent.report', async ($, e, next) => {
+    const r = await next(e)
+    await update($, running, ids => ids.filter(id => id !== e.agentId))
+    return r
+  }).catch(($, e, next) => next(e))
+
   on('tool.run', { tool: 'mcp__task-band__report' }, async ($, e) => {
+    // The band belongs to the main conversation; a subagent's report must not overwrite it.
+    if (agentOf(e)) return { result: 'Ignored: the task band only shows the main conversation.' }
     const a = e as unknown as Record<string, unknown>
     const strs = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [])
     const status = STATUSES.includes(a.status as TaskStatus) ? (a.status as TaskStatus) : 'done'
@@ -142,7 +161,7 @@ export const register: Register = on => {
   }).catch(() => ({ deny: 'task-band: could not update the band.' }))
 
   on('turn.complete', async ($, e, next) => {
-    if (!reported) {
+    if (!agentOf(e) && !reported) {
       const d = await read($, draft)
       if (d) {
         await update($, last, () => ({ task: d, status: 'done' as const, asks: ['(No report sent for this turn.)'] }))
@@ -157,6 +176,7 @@ export const register: Register = on => {
     const r = await read($, last)
     const d = await read($, draft)
     const s = await read($, steps)
+    const agents = (await read($, running)).length
     if (!r && !d) return next(e)
 
     const { Box, Text } = $.ui.resolve(e)
@@ -203,6 +223,9 @@ export const register: Register = on => {
           <Text size="title" weight="bold" tabular color={working ? 'claude' : 'success'}>
             {pct === null ? '…' : `${pct}%`}
           </Text>
+          {agents > 0 ? (
+            <Text dimColor>↳ {agents} subagent{agents === 1 ? '' : 's'} running</Text>
+          ) : null}
         </Box>
         {divider}
         <Box flexDirection="column" flexShrink={1}>

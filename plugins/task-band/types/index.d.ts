@@ -14,6 +14,7 @@ declare module 'claude-code' {
       last: Report | null
       steps: StepStatus[] | null
       draft: string | null
+      running: string[]
     }
   }
 }
