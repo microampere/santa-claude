@@ -178,10 +178,13 @@ export const register: Register = on => {
     const HEAD = 'suggestion'
     // A thin glyph line as tall as the tallest column; the glyph's own gaps leave it ~90% high.
     const rows = Math.max(3, 1 + asks.length)
-    // Stacked: a thin horizontal line across ~90% of the band's width.
-    const lineWidth = Math.max(10, Math.floor((e.props.bodyColumns - 2) * 0.9))
+    // Stacked: a thin horizontal line the full width of the band. It is drawn
+    // longer than any band and clipped at the edge, since cell widths differ
+    // per surface and a counted line can overflow and wrap.
     const divider = narrow ? (
-      <Text color="subtle">{'─'.repeat(lineWidth)}</Text>
+      <Box width="100%" overflow="hidden">
+        <Text color="subtle" wrap="clip">{'─'.repeat(500)}</Text>
+      </Box>
     ) : (
       <Box flexShrink={0}>
         <Text color="subtle">{Array(rows).fill('│').join('\n')}</Text>
