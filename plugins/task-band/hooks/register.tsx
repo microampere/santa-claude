@@ -188,6 +188,7 @@ export const register: Register = on => {
       <Box
         flexDirection={narrow ? 'column' : 'row'}
         columnGap={2}
+        rowGap={narrow ? 1 : 0}
         paddingX={1}
         paddingY="xs"
       >
