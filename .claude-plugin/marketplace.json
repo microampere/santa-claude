@@ -1,0 +1,12 @@
+{
+  "name": "santa-claude",
+  "owner": { "name": "microampere" },
+  "description": "microampere's Claude Code plugins and mods.",
+  "plugins": [
+    {
+      "name": "task-band",
+      "source": "./plugins/task-band",
+      "description": "A 3-column band above the prompt: progress, task status, and numbered y/n decisions."
+    }
+  ]
+}

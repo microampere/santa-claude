@@ -1,0 +1,51 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Read",
+      "Edit",
+      "Write",
+      "Glob",
+      "Grep",
+      "WebFetch",
+      "WebSearch",
+      "Agent",
+      "Skill",
+      "Task",
+      "TaskCreate",
+      "TaskUpdate",
+      "TaskGet",
+      "TaskList",
+      "TaskStop",
+      "TaskOutput",
+      "NotebookEdit",
+      "TodoWrite",
+      "Monitor",
+      "AskUserQuestion"
+    ]
+  },
+  "model": "sonnet",
+  "statusLine": {
+    "type": "command",
+    "command": "node ~/.claude/statusline.js",
+    "refreshInterval": 15
+  },
+  "extraKnownMarketplaces": {
+    "santa-claude": {
+      "source": { "source": "github", "repo": "microampere/santa-claude" },
+      "autoUpdate": true
+    },
+    "superpowers-marketplace": {
+      "source": { "source": "github", "repo": "obra/superpowers-marketplace" }
+    }
+  },
+  "enabledPlugins": {
+    "task-band@santa-claude": true
+  },
+  "effortLevel": "high",
+  "autoUpdatesChannel": "latest",
+  "tui": "fullscreen",
+  "skipDangerousModePermissionPrompt": true,
+  "theme": "auto",
+  "agentPushNotifEnabled": true
+}

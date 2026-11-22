@@ -1,0 +1,6 @@
+{
+  "name": "task-band",
+  "version": "0.1.0",
+  "description": "A 4-column band above the prompt: progress, task status, your y/n calls, and critical notes.",
+  "types": "./types/index.d.ts"
+}

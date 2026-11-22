@@ -1,0 +1,14 @@
+# Engine-generated plugin types
+.claude-plugin/types/
+plugins/*/.claude-plugin/types/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*~
+*.swp
+*.log
+
+# Never track per-machine or secret files
+settings.local.json
+.credentials.json
