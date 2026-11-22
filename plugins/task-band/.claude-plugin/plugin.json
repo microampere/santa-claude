@@ -1,6 +1,6 @@
 {
   "name": "task-band",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A 3-column band above the prompt: progress, task status, and numbered y/n decisions.",
   "types": "./types/index.d.ts"
 }

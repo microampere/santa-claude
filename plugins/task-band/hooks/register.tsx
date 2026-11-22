@@ -178,7 +178,11 @@ export const register: Register = on => {
     const HEAD = 'suggestion'
     // A thin glyph line as tall as the tallest column; the glyph's own gaps leave it ~90% high.
     const rows = Math.max(3, 1 + asks.length)
-    const divider = narrow ? null : (
+    // Stacked: a thin horizontal line across ~90% of the band's width.
+    const lineWidth = Math.max(10, Math.floor((e.props.bodyColumns - 2) * 0.9))
+    const divider = narrow ? (
+      <Text color="subtle">{'─'.repeat(lineWidth)}</Text>
+    ) : (
       <Box flexShrink={0}>
         <Text color="subtle">{Array(rows).fill('│').join('\n')}</Text>
       </Box>
@@ -188,7 +192,6 @@ export const register: Register = on => {
       <Box
         flexDirection={narrow ? 'column' : 'row'}
         columnGap={2}
-        rowGap={narrow ? 1 : 0}
         paddingX={1}
         paddingY="xs"
       >
