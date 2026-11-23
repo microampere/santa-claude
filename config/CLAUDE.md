@@ -101,31 +101,6 @@ These apply globally unless explicitly overridden for a specific task:
 - Never silently expand scope beyond the stated task
 - Never commit directly to main/master without confirmation
 
-## PowerShell Profile Setup
-
-**Required:** Add this to your PowerShell profile to fix shell compatibility issues.
-
-Run this once to create/edit your profile:
-```powershell
-notepad $PROFILE
-```
-
-Add these lines:
-```powershell
-# Unix-style ls compatibility
-function ls { Get-ChildItem @args -Force }
-function la { Get-ChildItem @args -Force }
-
-# Prevent bash execution of PowerShell cmdlets
-$env:SHELL = "pwsh"
-```
-
-After saving, reload: `. $PROFILE`
-
-This fixes:
-- `ls -la` errors (maps to `Get-ChildItem -Force`)
-- PowerShell cmdlets being run in bash (`Select-Object`, `Sort-Object`, etc.)
-
 ## Error Logging and Recovery
 
 When Claude runs a command that fails, especially one that's run multiple times:
@@ -148,7 +123,7 @@ Segments (left to right, white `|` delimiters):
 | Segment | Color | Source |
 |---|---|---|
 | Model name | Electric blue | `input.model` |
-| `ctx 00%` | Green | `input.context_window.used_percentage` |
-| `5h 00% 23:04` | Vivid red | `input.rate_limits.five_hour.used_percentage`; reset time from `.resets_at` (Unix epoch → local HH:MM) |
-| `7d 00%` | Bright cyan | `input.rate_limits.seven_day.used_percentage` |
 | Effort level | Gold | `input.effort.level` |
+| `ctx 00% 16K` | Green; `K`/`M` in desaturated green. Token number turns bold warning red at a displayed 100K or more | `input.context_window.used_percentage`; tokens = `current_usage` input + cache tokens (under 1K → `1K`, nearest K, nearest 0.1M from 1M) |
+| `5h 00% 23:04` | Violet | `input.rate_limits.five_hour.used_percentage`; reset time from `.resets_at` (Unix epoch → local HH:MM) |
+| `7d 00%` | Bright cyan | `input.rate_limits.seven_day.used_percentage` |

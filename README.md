@@ -10,9 +10,9 @@ config, so a new machine can be set up from this one repo.
 | `.claude-plugin/marketplace.json` | Makes this repo a plugin marketplace named `santa-claude` |
 | `plugins/task-band/` | A mod that draws a 3-column band above the prompt: progress %, task + status, and numbered y/n decisions you can answer with `1 y, 2 n` |
 | `config/CLAUDE.md` | Global instructions (`~/.claude/CLAUDE.md`) |
-| `config/statusline.js` | Status line: model, context %, 5h/7d limits, effort |
+| `config/statusline.js` | Status line: model, effort, context % and tokens, 5h/7d limits |
 | `config/settings.json` | Global settings; also registers this marketplace and enables task-band |
-| `setup.ps1` | Copies `config/` into `~/.claude`, backing up anything it replaces, and sets git's global user, author and committer email to my GitHub noreply address |
+| `setup.ps1` | Copies `config/` into `~/.claude` (backing up anything it replaces), installs task-band, sets git's global user, author and committer email to my GitHub noreply address, then checks each step |
 
 Third-party skills are not copied here. They come from their own sources: Matt Pocock's
 skills via the `mattpocock-skills` plugin synced from claude.ai, and superpowers via its marketplace.
@@ -33,7 +33,14 @@ A band above the prompt that shows what Claude is doing and what it needs from y
 
 ## Set up a new machine (Windows)
 
-Prerequisites: Git, Node.js (for the status line), Claude Code.
+Prerequisites: Git, Node.js (for the status line), Claude Code, signed in.
+
+The easy way: start Claude Code and tell it
+`Set up my Claude from github.com/microampere/santa-claude`. It follows the steps in
+"For Claude" below. Everything installs at user level (`~/.claude`, user-scope plugins,
+global git config); no project folder is touched.
+
+Or do it yourself:
 
 ```powershell
 git clone https://github.com/microampere/santa-claude C:\ws\santa-claude
@@ -43,28 +50,36 @@ git clone https://github.com/microampere/santa-claude C:\ws\santa-claude
 powershell -ExecutionPolicy Bypass -File C:\ws\santa-claude\setup.ps1
 ```
 
-Then start Claude Code. If the task band doesn't appear, install it yourself:
+It installs the config files and the task-band plugin, sets git's commit email, and ends
+with a PASS/FAIL check of each one. It's safe to run again. Restart Claude Code afterwards.
 
-```powershell
-claude plugin install task-band --marketplace microampere/santa-claude
-```
+### For Claude: setting up this machine
 
-If that says the marketplace is unknown, add it first:
+If the user asked you to set up their Claude from this repo, this is the whole job.
+`setup.ps1` is the source of truth. Don't copy or edit files by hand.
 
-```powershell
-claude plugin marketplace add microampere/santa-claude
-```
+1. Check that `git`, `node` and `claude` are on PATH. If any is missing, tell the user which and stop.
+2. Clone this repo to `C:\ws\santa-claude`. If it's already there, `git pull` instead.
+3. Run `powershell -ExecutionPolicy Bypass -File C:\ws\santa-claude\setup.ps1`.
+4. Read its output. Every line under `Checking:` must say PASS and the exit code must be 0.
+   If anything fails, report the failing lines to the user. Don't work around them.
+5. Tell the user to quit every Claude Code session and start a new one. Config and plugins
+   load at startup, so the current session won't show the changes.
 
-Or at the prompt of a terminal session: `/plugin install task-band --marketplace microampere/santa-claude`.
-Answer `y` to add the marketplace, then pick the user scope.
+What this repo deliberately does not manage:
 
-In the desktop app, where `/plugin` doesn't run: click + next to the prompt box, choose Plugins,
-then Add marketplace with `microampere/santa-claude`, then Add plugin.
+- Credentials and sign-in. The user signs in to Claude Code themselves.
+- `~/.claude/settings.local.json`, which is per-machine.
+- Skills and plugins synced from claude.ai (`mattpocock-skills`), and claude.ai connectors.
+  Both come back when the user signs in.
+- Desktop app (Code tab) preferences.
+- The `claude-code-plugins` marketplace (anthropics/claude-code). No plugin in use comes from it.
 
 ## Keeping it in sync
 
-**Config.** `setup.ps1` copies files; it doesn't link them. After you edit `~/.claude/CLAUDE.md`,
-`statusline.js` or `settings.json` on a machine, copy the file back into `config/` and commit it.
+**Config.** This repo is the only source of truth for user-level config. `setup.ps1` copies
+files; it doesn't link them. After you edit `~/.claude/CLAUDE.md`, `statusline.js` or
+`settings.json` on a machine, copy the file back into `config/` and commit it.
 
 **Plugins.** To pick up a new plugin version on a machine:
 
