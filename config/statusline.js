@@ -7,7 +7,10 @@ function fg(r, g, b) { return `\x1b[38;2;${r};${g};${b}m`; }
 const P = {
   modelFg:   fg(80,  160, 255),   // electric blue
   ctxFg:     fg(80,  220, 120),   // green
-  tokenFg:   fg(255,  60,  60),   // vivid red
+  ctxUnitFg: fg(140, 180, 150),   // desaturated green (K / M suffix)
+  tokenFg:   fg(190, 130, 255),   // violet (5h rate limit)
+  warnFg:    fg(255,  70,  70),   // warning red (ctx tokens ≥ 100K)
+  warnUnitFg: fg(200, 130, 130),  // desaturated red (K / M suffix when warning)
   sevenDayFg: fg(0,   255, 255),   // bright cyan
   effortFg:  fg(255, 215,   0),   // gold
   pipeFg:    fg(255, 255, 255),   // white
@@ -55,6 +58,24 @@ process.stdin.on('end', () => {
     ? Math.round(cw.used_percentage)
     : null;
 
+  // Tokens currently in context: prefer current_usage, else derive from pct × size
+  const cu = cw.current_usage;
+  let ctxTokens = null;
+  if (cu) {
+    ctxTokens = (cu.input_tokens || 0) + (cu.cache_creation_input_tokens || 0) +
+                (cu.cache_read_input_tokens || 0);
+  } else if (cw.used_percentage != null && cw.context_window_size) {
+    ctxTokens = cw.used_percentage / 100 * cw.context_window_size;
+  }
+
+  // 0–999 → 1K; <1M → nearest K; ≥1M → nearest 0.1M
+  function fmtTokens(n) {
+    if (n < 1000) return { num: '1', unit: 'K' };
+    const k = Math.round(n / 1000);
+    if (k < 1000) return { num: String(k), unit: 'K' };
+    return { num: (Math.round(n / 100000) / 10).toFixed(1), unit: 'M' };
+  }
+
   // ── Effort ───────────────────────────────────────────────
   const effort = input.effort && input.effort.level;
 
@@ -68,9 +89,21 @@ process.stdin.on('end', () => {
     parts.push(B + P.modelFg + resolvedModel + R);
   }
 
-  // 2. Context window — green
+  // 2. Effort — gold
+  if (effort) {
+    parts.push(P.effortFg + effort + R);
+  }
+
+  // 3. Context window — green
   if (ctxPct !== null) {
-    parts.push(P.ctxFg + 'ctx ' + ctxPct + '%' + R);
+    let s = P.ctxFg + 'ctx ' + ctxPct + '%';
+    if (ctxTokens !== null) {
+      const t = fmtTokens(ctxTokens);
+      const warn = t.unit === 'M' || Number(t.num) >= 100;  // based on displayed value
+      s += ' ' + (warn ? B + P.warnFg : '') + t.num + R +
+           (warn ? P.warnUnitFg : P.ctxUnitFg) + t.unit;
+    }
+    parts.push(s + R);
   }
 
   // 3. 5h rate limit — vivid red, with reset time
@@ -83,11 +116,6 @@ process.stdin.on('end', () => {
   // 3. 7d rate limit — bright cyan
   if (rl7dPct !== null) {
     parts.push(P.sevenDayFg + '7d ' + rl7dPct + '%' + R);
-  }
-
-  // 5. Effort — gold
-  if (effort) {
-    parts.push(P.effortFg + effort + R);
   }
 
   process.stdout.write(parts.join(PIPE));
